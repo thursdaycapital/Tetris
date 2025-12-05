@@ -1,0 +1,11 @@
+#!/bin/bash
+echo "=== 验证部署后的文件 ==="
+echo ""
+echo "1. 检查本地文件:"
+curl -s http://localhost:3000/.well-known/farcaster.json 2>/dev/null | python3 -m json.tool | grep -A 5 "accountAssociation" || echo "本地服务器未运行"
+echo ""
+echo "2. 检查部署后的文件 (需要等待部署完成):"
+echo "运行: curl https://tetris-app-iota.vercel.app/.well-known/farcaster.json | python3 -m json.tool"
+echo ""
+echo "3. 验证 accountAssociation 是否存在:"
+echo "运行: curl -s https://tetris-app-iota.vercel.app/.well-known/farcaster.json | python3 -c \"import json, sys; d=json.load(sys.stdin); print('accountAssociation 存在:', 'accountAssociation' in d)\""

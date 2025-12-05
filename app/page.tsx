@@ -16,20 +16,15 @@ export default function Home() {
   const [gameScore, setGameScore] = useState<number | undefined>();
   const [gameLines, setGameLines] = useState<number | undefined>();
   const [activeTab, setActiveTab] = useState<'game' | 'leaderboard'>('game');
-  const [sdkReady, setSdkReady] = useState(false);
+  // 初始设置为 true，避免白屏，SDK 可以异步加载
+  const [sdkReady, setSdkReady] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
-    // 设置超时，确保即使 SDK 加载失败也能显示游戏
-    const timeout = setTimeout(() => {
-      if (!sdkReady) {
-        console.warn('SDK loading timeout, showing game anyway');
-        setUserName('玩家');
-        setSdkReady(true);
-      }
-    }, 2000); // 2 秒超时
-
-    // 尝试加载 Farcaster SDK
+    // 立即设置用户名，避免等待
+    setUserName('玩家');
+    
+    // 尝试加载 Farcaster SDK（异步，不阻塞渲染）
     if (typeof window !== 'undefined') {
       const checkSDK = async () => {
         try {
@@ -68,35 +63,19 @@ export default function Home() {
               console.warn('Farcaster SDK not available:', e);
               setUserName('玩家');
             }
-            clearTimeout(timeout);
-            setSdkReady(true);
           };
           script.onerror = () => {
-            // SDK 加载失败，直接设置就绪状态
+            // SDK 加载失败，不影响游戏运行
             console.warn('SDK script load error');
-            setUserName('玩家');
-            clearTimeout(timeout);
-            setSdkReady(true);
           };
           document.head.appendChild(script);
         } catch (error) {
           console.warn('SDK initialization error:', error);
-          setUserName('玩家');
-          clearTimeout(timeout);
-          setSdkReady(true);
         }
       };
       
       checkSDK();
-    } else {
-      // 服务器端渲染，直接设置就绪
-      clearTimeout(timeout);
-      setSdkReady(true);
     }
-
-    return () => {
-      clearTimeout(timeout);
-    };
   }, []);
 
   function handleGameOver(score: number, lines: number) {

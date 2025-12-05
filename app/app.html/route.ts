@@ -76,19 +76,13 @@ export async function GET() {
   </style>
   
   <script>
-    // 使用 iframe 加载主应用，确保 Farcaster 可以检测到嵌入内容
-    window.addEventListener('DOMContentLoaded', function() {
-      const iframe = document.createElement('iframe');
-      iframe.src = '/';
-      iframe.style.width = '100%';
-      iframe.style.height = '100vh';
-      iframe.style.border = 'none';
-      iframe.style.position = 'fixed';
-      iframe.style.top = '0';
-      iframe.style.left = '0';
-      document.body.innerHTML = '';
-      document.body.appendChild(iframe);
-    });
+    // 直接重定向到主应用，避免 iframe 问题
+    // 延迟一点确保 meta 标签被解析
+    setTimeout(function() {
+      if (window.location.pathname === '/app.html' || window.location.pathname.endsWith('/app.html')) {
+        window.location.replace('/');
+      }
+    }, 100);
   </script>
 </head>
 <body>
