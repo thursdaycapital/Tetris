@@ -1,0 +1,8 @@
+{
+  "name": "Tetris Game",
+  "iconUrl": "https://your-domain.vercel.app/icon.png",
+  "splashImageUrl": "https://your-domain.vercel.app/splash.png",
+  "splashBackgroundColor": "#000000",
+  "homeUrl": "https://your-domain.vercel.app/app.html"
+}
+
