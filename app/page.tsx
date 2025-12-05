@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Tetris from '@/components/Tetris';
+import ShareButton from '@/components/ShareButton';
 import { soundManager } from '@/utils/sound';
 
 // 动态导入以避免 SSR 问题
@@ -128,24 +129,27 @@ export default function Home() {
             排行榜
           </button>
         </div>
-        <button
-          onClick={() => {
-            const newState = !soundEnabled;
-            setSoundEnabled(newState);
-            soundManager.setEnabled(newState);
-          }}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: soundEnabled ? 'rgba(0, 240, 240, 0.2)' : 'rgba(128, 128, 128, 0.2)',
-            color: soundEnabled ? '#00f0f0' : '#888',
-            border: `1px solid ${soundEnabled ? '#00f0f0' : '#888'}`,
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          {soundEnabled ? '🔊' : '🔇'} {soundEnabled ? '音效' : '静音'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <ShareButton score={gameScore} lines={gameLines} />
+          <button
+            onClick={() => {
+              const newState = !soundEnabled;
+              setSoundEnabled(newState);
+              soundManager.setEnabled(newState);
+            }}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: soundEnabled ? 'rgba(0, 240, 240, 0.2)' : 'rgba(128, 128, 128, 0.2)',
+              color: soundEnabled ? '#00f0f0' : '#888',
+              border: `1px solid ${soundEnabled ? '#00f0f0' : '#888'}`,
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            {soundEnabled ? '🔊' : '🔇'} {soundEnabled ? '音效' : '静音'}
+          </button>
+        </div>
       </div>
 
       {activeTab === 'game' ? (
