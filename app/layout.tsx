@@ -35,6 +35,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
+      <head>
+        {/* 允许在 iframe 中嵌入 */}
+        <meta httpEquiv="X-Frame-Options" content="ALLOWALL" />
+      </head>
       <body>{children}</body>
     </html>
   );

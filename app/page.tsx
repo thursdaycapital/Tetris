@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Tetris from '@/components/Tetris';
 import ShareButton from '@/components/ShareButton';
+import FarcasterDetector from '@/components/FarcasterDetector';
 import { soundManager } from '@/utils/sound';
 
 // 动态导入以避免 SSR 问题
@@ -107,6 +108,7 @@ export default function Home() {
       color: '#fff',
       padding: '10px'
     }}>
+      <FarcasterDetector />
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between',
