@@ -20,6 +20,15 @@ export default function Home() {
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
+    // 设置超时，确保即使 SDK 加载失败也能显示游戏
+    const timeout = setTimeout(() => {
+      if (!sdkReady) {
+        console.warn('SDK loading timeout, showing game anyway');
+        setUserName('玩家');
+        setSdkReady(true);
+      }
+    }, 2000); // 2 秒超时
+
     // 尝试加载 Farcaster SDK
     if (typeof window !== 'undefined') {
       const checkSDK = async () => {
@@ -59,22 +68,35 @@ export default function Home() {
               console.warn('Farcaster SDK not available:', e);
               setUserName('玩家');
             }
+            clearTimeout(timeout);
             setSdkReady(true);
           };
           script.onerror = () => {
             // SDK 加载失败，直接设置就绪状态
+            console.warn('SDK script load error');
             setUserName('玩家');
+            clearTimeout(timeout);
             setSdkReady(true);
           };
           document.head.appendChild(script);
         } catch (error) {
+          console.warn('SDK initialization error:', error);
           setUserName('玩家');
+          clearTimeout(timeout);
           setSdkReady(true);
         }
       };
       
       checkSDK();
+    } else {
+      // 服务器端渲染，直接设置就绪
+      clearTimeout(timeout);
+      setSdkReady(true);
     }
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
   function handleGameOver(score: number, lines: number) {
@@ -94,7 +116,8 @@ export default function Home() {
         alignItems: 'center', 
         height: '100vh',
         backgroundColor: '#000',
-        color: '#fff'
+        color: '#fff',
+        fontSize: '18px'
       }}>
         <div>加载中...</div>
       </div>
