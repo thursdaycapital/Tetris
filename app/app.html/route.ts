@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -22,30 +25,23 @@
   <!-- Allow embedding -->
   <meta http-equiv="X-Frame-Options" content="ALLOWALL" />
   
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-  </style>
-  
   <script>
     // 立即重定向到主应用
     window.location.replace('/');
   </script>
 </head>
 <body>
-  <div>加载中...</div>
+  <div style="font-family: system-ui; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <div>加载中...</div>
+  </div>
 </body>
-</html>
+</html>`;
+
+  return new NextResponse(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Frame-Options': 'ALLOWALL',
+    },
+  });
+}
 

@@ -38,6 +38,7 @@ export default function RootLayout({
       <head>
         {/* 允许在 iframe 中嵌入 */}
         <meta httpEquiv="X-Frame-Options" content="ALLOWALL" />
+        <meta name="referrer" content="no-referrer-when-downgrade" />
       </head>
       <body>{children}</body>
     </html>
