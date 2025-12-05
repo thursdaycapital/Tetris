@@ -9,6 +9,11 @@
     "signature": "fXiuZWq8EfZJKuM//CPcCHCSooQHEN6RRlgwwjfbdVY9g0HH5/uTPpZc/4VFDkfYOd5vRBHBgMCBa5kRZYmtFxs=",
     "public_key": "0xdC0334AfF2Cc0De9024d3b3C00719379d90BAE85"
   },
-  "permissions": []
+  "permissions": [],
+  "accountAssociation": {
+    "header": "eyJmaWQiOjMwNjE5MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweGRDMDMzNEFmRjJDYzBEZTkwMjRkM2IzQzAwNzE5Mzc5ZDkwQkFFODUifQ",
+    "payload": "eyJkb21haW4iOiJ0ZXRyaXMtYXBwLWlvdGEudmVyY2VsLmFwcCJ9",
+    "signature": "fXiuZWq8EfZJKuM//CPcCHCSooQHEN6RRlgwwjfbdVY9g0HH5/uTPpZc/4VFDkfYOd5vRBHBgMCBa5kRZYmtFxs="
+  }
 }
 
