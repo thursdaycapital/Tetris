@@ -1,8 +1,6 @@
 {
   "name": "Tetris Game",
   "iconUrl": "https://tetris-app-iota.vercel.app/icon.svg",
-  "splashImageUrl": "https://tetris-app-iota.vercel.app/splash.svg",
-  "splashBackgroundColor": "#000428",
   "homeUrl": "https://tetris-app-iota.vercel.app/app.html"
 }
 
