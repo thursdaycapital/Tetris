@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { soundManager, vibrateOnLineClear } from '@/utils/sound';
 
 // 游戏常量
@@ -156,7 +156,7 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     return { ...piece, shape: rotated };
   }
 
-  function dropPiece() {
+  const dropPiece = useCallback(() => {
     if (!currentPiece || gameOver || isPaused) return;
     
     const newPos = { ...currentPiece.pos, y: currentPiece.pos.y + 1 };
@@ -171,28 +171,34 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
       setBoard(clearedBoard);
       
       if (linesCleared > 0) {
-        const newLines = lines + linesCleared;
-        const newScore = score + linesCleared * 100 * level;
-        const newLevel = Math.floor(newLines / 10) + 1;
+        setLines(prev => {
+          const newLines = prev + linesCleared;
+          const newLevel = Math.floor(newLines / 10) + 1;
+          setScore(prevScore => {
+            const newScore = prevScore + linesCleared * 100 * newLevel;
+            return newScore;
+          });
+          setLevel(newLevel);
+          prevLevelRef.current = newLevel;
+          dropTimeRef.current = Math.max(100, INITIAL_DROP_TIME - (newLevel - 1) * 100);
+          
+          // 播放消除音效和震动
+          if (linesCleared === 1) {
+            soundManager.playLineClear();
+          } else {
+            soundManager.playMultiLineClear(linesCleared);
+          }
+          vibrateOnLineClear(linesCleared);
+          
+          // 等级提升音效
+          if (newLevel > level) {
+            soundManager.playLevelUp();
+          }
+          
+          return newLines;
+        });
         
-        // 播放消除音效和震动
-        if (linesCleared === 1) {
-          soundManager.playLineClear();
-        } else {
-          soundManager.playMultiLineClear(linesCleared);
-        }
-        vibrateOnLineClear(linesCleared);
-        
-        // 等级提升音效
-        if (newLevel > level) {
-          soundManager.playLevelUp();
-        }
-        
-        setLines(newLines);
-        setScore(newScore);
-        setLevel(newLevel);
-        prevLevelRef.current = newLevel;
-        dropTimeRef.current = Math.max(100, INITIAL_DROP_TIME - (newLevel - 1) * 100);
+        setScore(prev => prev + linesCleared * 100 * level);
       }
       
       const nextPiece = createPiece();
@@ -204,7 +210,8 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
         setCurrentPiece(nextPiece);
       }
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPiece, board, gameOver, isPaused]);
 
   function movePiece(direction: 'left' | 'right' | 'down') {
     if (!currentPiece || gameOver || isPaused) return;
@@ -235,7 +242,7 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     }
   }
 
-  function handleKeyPress(e: KeyboardEvent) {
+  const handleKeyPress = useCallback((e: KeyboardEvent) => {
     if (gameOver && e.key !== 'Enter') return;
     
     if (e.key === 'ArrowLeft') {
@@ -254,7 +261,8 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
       e.preventDefault();
       setIsPaused(!isPaused);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameOver, isPaused]);
 
   // 触摸控制
   function handleTouchStart(e: React.TouchEvent) {
@@ -316,11 +324,9 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
   }
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => handleKeyPress(e);
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameOver, isPaused]);
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleKeyPress]);
 
   useEffect(() => {
     if (gameOver || isPaused) return;
@@ -337,16 +343,14 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     const frameId = requestAnimationFrame(gameLoop);
     
     return () => cancelAnimationFrame(frameId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameOver, isPaused]);
+  }, [gameOver, isPaused, dropPiece]);
 
   useEffect(() => {
     if (!currentPiece) {
       const piece = createPiece();
       setCurrentPiece(piece);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentPiece]);
 
   function renderBoard(): Board {
     const displayBoard = board.map(row => [...row]) as Board;
