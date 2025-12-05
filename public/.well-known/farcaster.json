@@ -5,16 +5,3 @@
     "signature": "bP3TxIpHeJyElonVC252ZaUmXgDpMx7WOtE4OupYjPg3ri2oJXQ4LQoy76EDPg3G0Ez7pWpx4zRK1nFuDq/b+xs="
   }
 }
-"miniapp":{
-  "version": "v1",
-  "name": "俄罗斯方块",
-  "domain": "tetris-app-iota.vercel.app",
-  "icon_url": "https://tetris-app-iota.vercel.app/icon.svg",
-  "screenshot_url": "https://tetris-app-iota.vercel.app/icon.svg",
-  "publisher": {
-    "fid": 306193,
-    "signature": "fXiuZWq8EfZJKuM//CPcCHCSooQHEN6RRlgwwjfbdVY9g0HH5/uTPpZc/4VFDkfYOd5vRBHBgMCBa5kRZYmtFxs=",
-    "public_key": "0xdC0334AfF2Cc0De9024d3b3C00719379d90BAE85"
-  },
-  "permissions": []
-}
