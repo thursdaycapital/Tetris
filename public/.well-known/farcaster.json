@@ -1,15 +1,4 @@
 {
-  "version": "v1",
-  "name": "俄罗斯方块",
-  "domain": "tetris-app-iota.vercel.app",
-  "icon_url": "https://tetris-app-iota.vercel.app/icon.svg",
-  "screenshot_url": "https://tetris-app-iota.vercel.app/icon.svg",
-  "publisher": {
-    "fid": 306193,
-    "signature": "fXiuZWq8EfZJKuM//CPcCHCSooQHEN6RRlgwwjfbdVY9g0HH5/uTPpZc/4VFDkfYOd5vRBHBgMCBa5kRZYmtFxs=",
-    "public_key": "0xdC0334AfF2Cc0De9024d3b3C00719379d90BAE85"
-  },
-  "permissions": [],
   "accountAssociation": {
     "header": "eyJmaWQiOjMwNjE5MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweGRDMDMzNEFmRjJDYzBEZTkwMjRkM2IzQzAwNzE5Mzc5ZDkwQkFFODUifQ",
     "payload": "eyJkb21haW4iOiJ0ZXRyaXMtYXBwLWlvdGEudmVyY2VsLmFwcCJ9",
