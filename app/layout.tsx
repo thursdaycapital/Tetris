@@ -39,6 +39,13 @@ export default function RootLayout({
         {/* 允许在 iframe 中嵌入 */}
         <meta httpEquiv="X-Frame-Options" content="ALLOWALL" />
         <meta name="referrer" content="no-referrer-when-downgrade" />
+        
+        {/* Farcaster Frame Meta Tags */}
+        <meta name="fc:app" content="true" />
+        <meta name="fc:frame" content="vNext" />
+        <meta name="fc:frame:image" content="https://tetris-app-iota.vercel.app/icon.svg" />
+        <meta name="fc:frame:button:1" content="开始游戏" />
+        <meta name="fc:frame:post_url" content="https://tetris-app-iota.vercel.app/api/frame" />
       </head>
       <body>{children}</body>
     </html>

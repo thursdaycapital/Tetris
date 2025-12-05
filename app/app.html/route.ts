@@ -27,6 +27,13 @@ export async function GET() {
   <!-- Allow embedding -->
   <meta http-equiv="X-Frame-Options" content="ALLOWALL" />
   
+  <!-- Farcaster Frame Meta Tags -->
+  <meta name="fc:app" content="true" />
+  <meta name="fc:frame" content="vNext" />
+  <meta name="fc:frame:image" content="https://tetris-app-iota.vercel.app/icon.svg" />
+  <meta name="fc:frame:button:1" content="开始游戏" />
+  <meta name="fc:frame:post_url" content="https://tetris-app-iota.vercel.app/api/frame" />
+  
   <style>
     * {
       margin: 0;
