@@ -13,12 +13,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
-      <head>
-        <script
-          src="https://unpkg.com/@farcaster/frame-sdk@latest/dist/index.umd.js"
-          async
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

@@ -316,9 +316,11 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
   }
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentPiece, board, gameOver, isPaused]);
+    const handler = (e: KeyboardEvent) => handleKeyPress(e);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameOver, isPaused]);
 
   useEffect(() => {
     if (gameOver || isPaused) return;
@@ -335,13 +337,15 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     const frameId = requestAnimationFrame(gameLoop);
     
     return () => cancelAnimationFrame(frameId);
-  }, [currentPiece, board, gameOver, isPaused]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameOver, isPaused]);
 
   useEffect(() => {
     if (!currentPiece) {
       const piece = createPiece();
       setCurrentPiece(piece);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function renderBoard(): Board {
@@ -434,20 +438,23 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
           userSelect: 'none'
         }}
       >
-        {displayBoard.flat().map((cell, index) => (
-          <div
-            key={index}
-            style={{
-              width: `${cellSize}px`,
-              height: `${cellSize}px`,
-              backgroundColor: cell && cell !== 0 ? COLORS[cell] : COLORS.empty,
-              border: cell && cell !== 0 ? '1px solid rgba(255,255,255,0.3)' : 'none',
-              borderRadius: '2px',
-              boxShadow: cell && cell !== 0 ? 'inset 0 0 5px rgba(0,0,0,0.3)' : 'none',
-              transition: 'all 0.1s ease'
-            }}
-          />
-        ))}
+        {displayBoard.flat().map((cell, index) => {
+          const isFilled = cell !== 0 && cell in COLORS;
+          return (
+            <div
+              key={index}
+              style={{
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                backgroundColor: isFilled ? COLORS[cell as TetrominoType] : COLORS.empty,
+                border: isFilled ? '1px solid rgba(255,255,255,0.3)' : 'none',
+                borderRadius: '2px',
+                boxShadow: isFilled ? 'inset 0 0 5px rgba(0,0,0,0.3)' : 'none',
+                transition: 'all 0.1s ease'
+              }}
+            />
+          );
+        })}
       </div>
       
       {/* 移动端控制按钮 */}

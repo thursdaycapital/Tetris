@@ -20,25 +20,35 @@ export default function Home() {
   useEffect(() => {
     // 尝试加载 Farcaster SDK
     if (typeof window !== 'undefined') {
-      // 检查是否在 Farcaster 环境中
       const checkSDK = async () => {
         try {
-          // @ts-ignore - Farcaster SDK 可能未定义
-          if (window.farcaster) {
-            setSdkReady(true);
-            // @ts-ignore
-            const context = await window.farcaster.context;
-            if (context?.user) {
-              setUserName(context.user.username || context.user.displayName || '玩家');
-              setFid(context.user.fid);
+          // 动态加载 Farcaster SDK
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/@farcaster/frame-sdk@latest/dist/index.umd.js';
+          script.async = true;
+          script.onload = async () => {
+            try {
+              // @ts-ignore - Farcaster SDK 可能未定义
+              if (window.farcaster) {
+                // @ts-ignore
+                const context = await window.farcaster.context;
+                if (context?.user) {
+                  setUserName(context.user.username || context.user.displayName || '玩家');
+                  setFid(context.user.fid);
+                }
+              }
+            } catch (e) {
+              console.warn('Farcaster SDK not available');
             }
-          } else {
-            // 不在 Farcaster 环境中，使用默认用户名
             setUserName('玩家');
             setSdkReady(true);
-          }
+          };
+          script.onerror = () => {
+            setUserName('玩家');
+            setSdkReady(true);
+          };
+          document.head.appendChild(script);
         } catch (error) {
-          console.error('Failed to load Farcaster SDK:', error);
           setUserName('玩家');
           setSdkReady(true);
         }
