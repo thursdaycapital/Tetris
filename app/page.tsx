@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Tetris from '@/components/Tetris';
+import { soundManager } from '@/utils/sound';
 
 // 动态导入以避免 SSR 问题
 const LeaderboardDynamic = dynamic(() => import('@/components/Leaderboard'), { ssr: false });
@@ -14,6 +15,7 @@ export default function Home() {
   const [gameLines, setGameLines] = useState<number | undefined>();
   const [activeTab, setActiveTab] = useState<'game' | 'leaderboard'>('game');
   const [sdkReady, setSdkReady] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   useEffect(() => {
     // 尝试加载 Farcaster SDK
@@ -79,38 +81,60 @@ export default function Home() {
     }}>
       <div style={{ 
         display: 'flex', 
-        justifyContent: 'center', 
-        gap: '10px',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: '20px',
-        borderBottom: '1px solid #333'
+        borderBottom: '1px solid #333',
+        flexWrap: 'wrap',
+        gap: '10px'
       }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={() => setActiveTab('game')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: activeTab === 'game' ? '#00f0f0' : 'transparent',
+              color: '#fff',
+              border: '1px solid #00f0f0',
+              borderRadius: '5px 5px 0 0',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            游戏
+          </button>
+          <button
+            onClick={() => setActiveTab('leaderboard')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: activeTab === 'leaderboard' ? '#00f0f0' : 'transparent',
+              color: '#fff',
+              border: '1px solid #00f0f0',
+              borderRadius: '5px 5px 0 0',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            排行榜
+          </button>
+        </div>
         <button
-          onClick={() => setActiveTab('game')}
+          onClick={() => {
+            const newState = !soundEnabled;
+            setSoundEnabled(newState);
+            soundManager.setEnabled(newState);
+          }}
           style={{
-            padding: '10px 20px',
-            backgroundColor: activeTab === 'game' ? '#4CAF50' : 'transparent',
-            color: '#fff',
-            border: '1px solid #4CAF50',
-            borderRadius: '5px 5px 0 0',
+            padding: '8px 16px',
+            backgroundColor: soundEnabled ? 'rgba(0, 240, 240, 0.2)' : 'rgba(128, 128, 128, 0.2)',
+            color: soundEnabled ? '#00f0f0' : '#888',
+            border: `1px solid ${soundEnabled ? '#00f0f0' : '#888'}`,
+            borderRadius: '5px',
             cursor: 'pointer',
             fontSize: '14px'
           }}
         >
-          游戏
-        </button>
-        <button
-          onClick={() => setActiveTab('leaderboard')}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: activeTab === 'leaderboard' ? '#4CAF50' : 'transparent',
-            color: '#fff',
-            border: '1px solid #4CAF50',
-            borderRadius: '5px 5px 0 0',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          排行榜
+          {soundEnabled ? '🔊' : '🔇'} {soundEnabled ? '音效' : '静音'}
         </button>
       </div>
 

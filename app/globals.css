@@ -22,9 +22,33 @@ body {
 
 button {
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 button:active {
   opacity: 0.8;
+  transform: scale(0.95);
+  transition: transform 0.1s;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* 防止双击缩放 */
+@media (max-width: 768px) {
+  * {
+    touch-action: manipulation;
+  }
 }
 

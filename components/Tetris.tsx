@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { soundManager, vibrateOnLineClear } from '@/utils/sound';
 
 // 游戏常量
 const BOARD_WIDTH = 10;
@@ -60,8 +61,22 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
   const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropTimeRef = useRef(INITIAL_DROP_TIME);
   const lastTimeRef = useRef(0);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const prevLevelRef = useRef(1);
+
+  // 检测移动设备
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   function createEmptyBoard(): Board {
     return Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
@@ -149,6 +164,7 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     if (isValidMove(currentPiece, board, newPos)) {
       setCurrentPiece({ ...currentPiece, pos: newPos });
     } else {
+      soundManager.playPlace();
       const newBoard = placePiece(currentPiece, board);
       const { newBoard: clearedBoard, linesCleared } = clearLines(newBoard);
       
@@ -159,15 +175,30 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
         const newScore = score + linesCleared * 100 * level;
         const newLevel = Math.floor(newLines / 10) + 1;
         
+        // 播放消除音效和震动
+        if (linesCleared === 1) {
+          soundManager.playLineClear();
+        } else {
+          soundManager.playMultiLineClear(linesCleared);
+        }
+        vibrateOnLineClear(linesCleared);
+        
+        // 等级提升音效
+        if (newLevel > level) {
+          soundManager.playLevelUp();
+        }
+        
         setLines(newLines);
         setScore(newScore);
         setLevel(newLevel);
+        prevLevelRef.current = newLevel;
         dropTimeRef.current = Math.max(100, INITIAL_DROP_TIME - (newLevel - 1) * 100);
       }
       
       const nextPiece = createPiece();
       if (!isValidMove(nextPiece, clearedBoard, nextPiece.pos)) {
         setGameOver(true);
+        soundManager.playGameOver();
         onGameOver(score + linesCleared * 100 * level, lines + linesCleared);
       } else {
         setCurrentPiece(nextPiece);
@@ -179,9 +210,15 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     if (!currentPiece || gameOver || isPaused) return;
     
     const newPos = { ...currentPiece.pos };
-    if (direction === 'left') newPos.x--;
-    else if (direction === 'right') newPos.x++;
-    else if (direction === 'down') newPos.y++;
+    if (direction === 'left') {
+      newPos.x--;
+      soundManager.playMove();
+    } else if (direction === 'right') {
+      newPos.x++;
+      soundManager.playMove();
+    } else if (direction === 'down') {
+      newPos.y++;
+    }
     
     if (isValidMove(currentPiece, board, newPos)) {
       setCurrentPiece({ ...currentPiece, pos: newPos });
@@ -194,23 +231,88 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     const rotated = rotatePiece(currentPiece);
     if (rotated && isValidMove(rotated, board, rotated.pos)) {
       setCurrentPiece(rotated);
+      soundManager.playRotate();
     }
   }
 
   function handleKeyPress(e: KeyboardEvent) {
-    if (gameOver) return;
+    if (gameOver && e.key !== 'Enter') return;
     
     if (e.key === 'ArrowLeft') {
+      e.preventDefault();
       movePiece('left');
     } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
       movePiece('right');
     } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
       movePiece('down');
     } else if (e.key === 'ArrowUp' || e.key === ' ') {
+      e.preventDefault();
       handleRotate();
     } else if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
       setIsPaused(!isPaused);
     }
+  }
+
+  // 触摸控制
+  function handleTouchStart(e: React.TouchEvent) {
+    if (!boardRef.current) return;
+    const touch = e.touches[0];
+    const rect = boardRef.current.getBoundingClientRect();
+    touchStartRef.current = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+      time: Date.now()
+    };
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (!touchStartRef.current || !boardRef.current) return;
+    
+    const touch = e.changedTouches[0];
+    const rect = boardRef.current.getBoundingClientRect();
+    const endX = touch.clientX - rect.left;
+    const endY = touch.clientY - rect.top;
+    
+    const deltaX = endX - touchStartRef.current.x;
+    const deltaY = endY - touchStartRef.current.y;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+    
+    const minSwipeDistance = 30;
+    const maxSwipeTime = 300;
+    
+    if (deltaTime < maxSwipeTime) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // 水平滑动
+        if (Math.abs(deltaX) > minSwipeDistance) {
+          if (deltaX > 0) {
+            movePiece('right');
+          } else {
+            movePiece('left');
+          }
+        }
+      } else {
+        // 垂直滑动
+        if (Math.abs(deltaY) > minSwipeDistance) {
+          if (deltaY > 0) {
+            // 向下滑动 - 快速下降
+            for (let i = 0; i < 5; i++) {
+              setTimeout(() => movePiece('down'), i * 10);
+            }
+          } else {
+            // 向上滑动 - 旋转
+            handleRotate();
+          }
+        } else {
+          // 点击 - 旋转
+          handleRotate();
+        }
+      }
+    }
+    
+    touchStartRef.current = null;
   }
 
   useEffect(() => {
@@ -268,44 +370,178 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     setScore(0);
     setLines(0);
     setLevel(1);
+    prevLevelRef.current = 1;
     setGameOver(false);
     setIsPaused(false);
     dropTimeRef.current = INITIAL_DROP_TIME;
   }
 
   const displayBoard = renderBoard();
+  const cellSize = isMobile && typeof window !== 'undefined' 
+    ? Math.min(28, Math.floor((window.innerWidth - 40) / BOARD_WIDTH)) 
+    : 20;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
-      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '24px', marginBottom: '10px' }}>俄罗斯方块</h1>
-        <div style={{ display: 'flex', gap: '20px', fontSize: '14px' }}>
-          <div>分数: {score}</div>
-          <div>行数: {lines}</div>
-          <div>等级: {level}</div>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      padding: isMobile ? '10px' : '20px',
+      width: '100%',
+      maxWidth: '600px',
+      margin: '0 auto'
+    }}>
+      <div style={{ 
+        marginBottom: isMobile ? '15px' : '20px', 
+        textAlign: 'center',
+        width: '100%'
+      }}>
+        <h1 style={{ 
+          fontSize: isMobile ? '20px' : '24px', 
+          marginBottom: '10px',
+          background: 'linear-gradient(90deg, #00f0f0, #f0f000)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>俄罗斯方块</h1>
+        <div style={{ 
+          display: 'flex', 
+          gap: isMobile ? '10px' : '20px', 
+          fontSize: isMobile ? '12px' : '14px',
+          justifyContent: 'center',
+          flexWrap: 'wrap'
+        }}>
+          <div>分数: <strong>{score}</strong></div>
+          <div>行数: <strong>{lines}</strong></div>
+          <div>等级: <strong>{level}</strong></div>
         </div>
       </div>
       
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: `repeat(${BOARD_WIDTH}, 20px)`,
-        gap: '1px',
-        backgroundColor: '#333',
-        padding: '2px',
-        border: '2px solid #fff'
-      }}>
+      <div 
+        ref={boardRef}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ 
+          display: 'grid', 
+          gridTemplateColumns: `repeat(${BOARD_WIDTH}, ${cellSize}px)`,
+          gap: '1px',
+          backgroundColor: '#333',
+          padding: '2px',
+          border: '2px solid #00f0f0',
+          borderRadius: '4px',
+          boxShadow: '0 0 20px rgba(0, 240, 240, 0.3)',
+          touchAction: 'none',
+          userSelect: 'none'
+        }}
+      >
         {displayBoard.flat().map((cell, index) => (
           <div
             key={index}
             style={{
-              width: '20px',
-              height: '20px',
+              width: `${cellSize}px`,
+              height: `${cellSize}px`,
               backgroundColor: cell && cell !== 0 ? COLORS[cell] : COLORS.empty,
-              border: cell ? '1px solid rgba(255,255,255,0.3)' : 'none'
+              border: cell && cell !== 0 ? '1px solid rgba(255,255,255,0.3)' : 'none',
+              borderRadius: '2px',
+              boxShadow: cell && cell !== 0 ? 'inset 0 0 5px rgba(0,0,0,0.3)' : 'none',
+              transition: 'all 0.1s ease'
             }}
           />
         ))}
       </div>
+      
+      {/* 移动端控制按钮 */}
+      {isMobile && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '10px',
+          marginTop: '20px',
+          width: '100%',
+          maxWidth: '300px'
+        }}>
+          <button
+            onClick={() => movePiece('left')}
+            style={{
+              padding: '15px',
+              fontSize: '24px',
+              backgroundColor: 'rgba(0, 240, 240, 0.2)',
+              color: '#00f0f0',
+              border: '2px solid #00f0f0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            ←
+          </button>
+          <button
+            onClick={handleRotate}
+            style={{
+              padding: '15px',
+              fontSize: '24px',
+              backgroundColor: 'rgba(0, 240, 240, 0.2)',
+              color: '#00f0f0',
+              border: '2px solid #00f0f0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            ↻
+          </button>
+          <button
+            onClick={() => movePiece('right')}
+            style={{
+              padding: '15px',
+              fontSize: '24px',
+              backgroundColor: 'rgba(0, 240, 240, 0.2)',
+              color: '#00f0f0',
+              border: '2px solid #00f0f0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            →
+          </button>
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            style={{
+              gridColumn: '1 / 3',
+              padding: '12px',
+              fontSize: '16px',
+              backgroundColor: 'rgba(160, 0, 240, 0.2)',
+              color: '#a000f0',
+              border: '2px solid #a000f0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            {isPaused ? '继续' : '暂停'}
+          </button>
+          <button
+            onClick={() => {
+              for (let i = 0; i < 5; i++) {
+                setTimeout(() => movePiece('down'), i * 10);
+              }
+            }}
+            style={{
+              padding: '15px',
+              fontSize: '24px',
+              backgroundColor: 'rgba(0, 240, 240, 0.2)',
+              color: '#00f0f0',
+              border: '2px solid #00f0f0',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              touchAction: 'manipulation'
+            }}
+          >
+            ↓
+          </button>
+        </div>
+      )}
       
       {(gameOver || isPaused) && (
         <div style={{
@@ -313,31 +549,42 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          backgroundColor: 'rgba(0,0,0,0.9)',
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
           padding: '30px',
           borderRadius: '10px',
           textAlign: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          border: '2px solid #00f0f0',
+          boxShadow: '0 0 30px rgba(0, 240, 240, 0.5)',
+          maxWidth: '90%'
         }}>
-          <h2 style={{ marginBottom: '20px' }}>
+          <h2 style={{ 
+            marginBottom: '20px',
+            background: 'linear-gradient(90deg, #00f0f0, #f0f000)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
             {gameOver ? '游戏结束!' : '游戏暂停'}
           </h2>
           {gameOver && (
             <>
-              <p style={{ marginBottom: '10px' }}>最终分数: {score}</p>
-              <p style={{ marginBottom: '20px' }}>消除行数: {lines}</p>
+              <p style={{ marginBottom: '10px' }}>最终分数: <strong>{score}</strong></p>
+              <p style={{ marginBottom: '20px' }}>消除行数: <strong>{lines}</strong></p>
             </>
           )}
           <button
             onClick={resetGame}
             style={{
-              padding: '10px 20px',
+              padding: '12px 24px',
               fontSize: '16px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
+              backgroundColor: '#00f0f0',
+              color: '#000',
               border: 'none',
               borderRadius: '5px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              touchAction: 'manipulation'
             }}
           >
             重新开始
@@ -345,11 +592,18 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
         </div>
       )}
       
-      <div style={{ marginTop: '20px', fontSize: '12px', textAlign: 'center', color: '#888' }}>
-        <p>方向键移动，上键/空格旋转</p>
-        <p>P 键暂停</p>
-      </div>
+      {!isMobile && (
+        <div style={{ marginTop: '20px', fontSize: '12px', textAlign: 'center', color: '#888' }}>
+          <p>方向键移动，上键/空格旋转</p>
+          <p>P 键暂停</p>
+        </div>
+      )}
+      {isMobile && (
+        <div style={{ marginTop: '15px', fontSize: '11px', textAlign: 'center', color: '#888' }}>
+          <p>滑动控制：左右移动，上滑旋转，下滑快速下降</p>
+          <p>点击屏幕中央也可旋转</p>
+        </div>
+      )}
     </div>
   );
 }
-

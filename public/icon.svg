@@ -1,0 +1,63 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#000428;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#004e92;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blockGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00f0f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00a0a0;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bgGradient)" rx="80"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.2">
+    <defs>
+      <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+        <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#00f0f0" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="512" height="512" fill="url(#grid)"/>
+  </g>
+  
+  <!-- Tetris blocks -->
+  <g transform="translate(128, 96)">
+    <!-- I block -->
+    <rect x="0" y="0" width="64" height="16" fill="url(#blockGradient)" filter="url(#glow)" rx="2"/>
+    <!-- T block -->
+    <rect x="96" y="0" width="16" height="16" fill="#a000f0" filter="url(#glow)" rx="2"/>
+    <rect x="80" y="16" width="48" height="16" fill="#a000f0" filter="url(#glow)" rx="2"/>
+    <!-- L block -->
+    <rect x="160" y="0" width="16" height="48" fill="#f0a000" filter="url(#glow)" rx="2"/>
+    <rect x="176" y="32" width="32" height="16" fill="#f0a000" filter="url(#glow)" rx="2"/>
+    <!-- O block -->
+    <rect x="224" y="0" width="32" height="32" fill="#f0f000" filter="url(#glow)" rx="2"/>
+  </g>
+  
+  <!-- Tech lines -->
+  <g stroke="#00f0f0" stroke-width="2" fill="none" opacity="0.6">
+    <line x1="64" y1="256" x2="448" y2="256" filter="url(#glow)"/>
+    <line x1="256" y1="64" x2="256" y2="448" filter="url(#glow)"/>
+  </g>
+  
+  <!-- Corner accents -->
+  <circle cx="64" cy="64" r="8" fill="#00f0f0" filter="url(#glow)"/>
+  <circle cx="448" cy="64" r="8" fill="#00f0f0" filter="url(#glow)"/>
+  <circle cx="64" cy="448" r="8" fill="#00f0f0" filter="url(#glow)"/>
+  <circle cx="448" cy="448" r="8" fill="#00f0f0" filter="url(#glow)"/>
+  
+  <!-- Title text effect -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="48" font-weight="bold" 
+        fill="#00f0f0" text-anchor="middle" filter="url(#glow)" opacity="0.9">T</text>
+</svg>
+

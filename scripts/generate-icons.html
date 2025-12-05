@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Icons</title>
+</head>
+<body>
+  <h1>Icon Generator</h1>
+  <p>打开浏览器控制台查看下载链接</p>
+  <canvas id="iconCanvas" width="512" height="512"></canvas>
+  <canvas id="splashCanvas" width="1200" height="630"></canvas>
+  <script>
+    function drawIcon(canvas) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      
+      // Background gradient
+      const bgGradient = ctx.createLinearGradient(0, 0, w, h);
+      bgGradient.addColorStop(0, '#000428');
+      bgGradient.addColorStop(1, '#004e92');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, w, h);
+      
+      // Grid
+      ctx.strokeStyle = 'rgba(0, 240, 240, 0.2)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < w; i += 32) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, h);
+        ctx.stroke();
+      }
+      for (let i = 0; i < h; i += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(w, i);
+        ctx.stroke();
+      }
+      
+      // Blocks
+      const blockGradient = ctx.createLinearGradient(0, 0, 64, 16);
+      blockGradient.addColorStop(0, '#00f0f0');
+      blockGradient.addColorStop(1, '#00a0a0');
+      
+      // I block
+      ctx.fillStyle = blockGradient;
+      ctx.fillRect(128, 96, 64, 16);
+      
+      // T block
+      ctx.fillStyle = '#a000f0';
+      ctx.fillRect(224, 96, 16, 16);
+      ctx.fillRect(208, 112, 48, 16);
+      
+      // L block
+      ctx.fillStyle = '#f0a000';
+      ctx.fillRect(288, 96, 16, 48);
+      ctx.fillRect(304, 128, 32, 16);
+      
+      // O block
+      ctx.fillStyle = '#f0f000';
+      ctx.fillRect(352, 96, 32, 32);
+      
+      // Glow effect
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#00f0f0';
+      
+      // Title
+      ctx.fillStyle = '#00f0f0';
+      ctx.font = 'bold 48px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('T', w/2, 380);
+    }
+    
+    function drawSplash(canvas) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      
+      // Background
+      const bgGradient = ctx.createLinearGradient(0, 0, w, h);
+      bgGradient.addColorStop(0, '#000428');
+      bgGradient.addColorStop(0.5, '#004e92');
+      bgGradient.addColorStop(1, '#000428');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, w, h);
+      
+      // Grid
+      ctx.strokeStyle = 'rgba(0, 240, 240, 0.3)';
+      for (let i = 0; i < w; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, h);
+        ctx.stroke();
+      }
+      for (let i = 0; i < h; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(w, i);
+        ctx.stroke();
+      }
+      
+      // Blocks
+      const blockGradient = ctx.createLinearGradient(0, 0, 120, 30);
+      blockGradient.addColorStop(0, '#00f0f0');
+      blockGradient.addColorStop(1, '#00a0a0');
+      
+      // I block
+      ctx.fillStyle = blockGradient;
+      ctx.fillRect(200, 150, 120, 30);
+      
+      // T block
+      ctx.fillStyle = '#a000f0';
+      ctx.fillRect(380, 150, 30, 30);
+      ctx.fillRect(350, 180, 90, 30);
+      
+      // L block
+      ctx.fillStyle = '#f0a000';
+      ctx.fillRect(500, 150, 30, 90);
+      ctx.fillRect(530, 210, 60, 30);
+      
+      // O block
+      ctx.fillStyle = '#f0f000';
+      ctx.fillRect(620, 150, 60, 60);
+      
+      // Title
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#00f0f0';
+      ctx.fillStyle = '#00f0f0';
+      ctx.font = 'bold 96px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('TETRIS', w/2, 400);
+      
+      ctx.font = '32px Arial';
+      ctx.fillText('Farcaster Mini App', w/2, 480);
+    }
+    
+    const iconCanvas = document.getElementById('iconCanvas');
+    const splashCanvas = document.getElementById('splashCanvas');
+    
+    drawIcon(iconCanvas);
+    drawSplash(splashCanvas);
+    
+    // Download functions
+    iconCanvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'icon.png';
+      console.log('Icon ready! Click this link to download:', url);
+      document.body.appendChild(a);
+      a.click();
+    });
+    
+    splashCanvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'splash.png';
+      console.log('Splash ready! Click this link to download:', url);
+      setTimeout(() => {
+        document.body.appendChild(a);
+        a.click();
+      }, 500);
+    });
+  </script>
+</body>
+</html>
+
