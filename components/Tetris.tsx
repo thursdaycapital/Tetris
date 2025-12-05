@@ -67,6 +67,10 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const prevLevelRef = useRef(1);
+  const currentPieceRef = useRef(currentPiece);
+  const boardStateRef = useRef(board);
+  const gameOverRef = useRef(gameOver);
+  const isPausedRef = useRef(isPaused);
 
   // 检测移动设备
   useEffect(() => {
@@ -156,28 +160,43 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     return { ...piece, shape: rotated };
   }
 
-  const dropPiece = useCallback(() => {
-    if (!currentPiece || gameOver || isPaused) return;
+  // 使用 ref 来访问最新状态，避免游戏循环被重置
+  useEffect(() => {
+    currentPieceRef.current = currentPiece;
+    boardStateRef.current = board;
+    gameOverRef.current = gameOver;
+    isPausedRef.current = isPaused;
+  }, [currentPiece, board, gameOver, isPaused]);
+
+  function dropPiece() {
+    const currentPieceValue = currentPieceRef.current;
+    const boardValue = boardStateRef.current;
+    const gameOverValue = gameOverRef.current;
+    const isPausedValue = isPausedRef.current;
     
-    const newPos = { ...currentPiece.pos, y: currentPiece.pos.y + 1 };
+    if (!currentPieceValue || gameOverValue || isPausedValue) return;
     
-    if (isValidMove(currentPiece, board, newPos)) {
-      setCurrentPiece({ ...currentPiece, pos: newPos });
+    const newPos = { ...currentPieceValue.pos, y: currentPieceValue.pos.y + 1 };
+    
+    if (isValidMove(currentPieceValue, boardValue, newPos)) {
+      setCurrentPiece({ ...currentPieceValue, pos: newPos });
     } else {
       soundManager.playPlace();
-      const newBoard = placePiece(currentPiece, board);
+      const newBoard = placePiece(currentPieceValue, boardValue);
       const { newBoard: clearedBoard, linesCleared } = clearLines(newBoard);
       
       setBoard(clearedBoard);
       
       if (linesCleared > 0) {
-        setLines(prev => {
-          const newLines = prev + linesCleared;
+        setLines(prevLines => {
+          const newLines = prevLines + linesCleared;
           const newLevel = Math.floor(newLines / 10) + 1;
+          
           setScore(prevScore => {
             const newScore = prevScore + linesCleared * 100 * newLevel;
             return newScore;
           });
+          
           setLevel(newLevel);
           prevLevelRef.current = newLevel;
           dropTimeRef.current = Math.max(100, INITIAL_DROP_TIME - (newLevel - 1) * 100);
@@ -190,28 +209,26 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
           }
           vibrateOnLineClear(linesCleared);
           
-          // 等级提升音效
-          if (newLevel > level) {
-            soundManager.playLevelUp();
-          }
-          
           return newLines;
         });
-        
-        setScore(prev => prev + linesCleared * 100 * level);
       }
       
       const nextPiece = createPiece();
       if (!isValidMove(nextPiece, clearedBoard, nextPiece.pos)) {
         setGameOver(true);
         soundManager.playGameOver();
-        onGameOver(score + linesCleared * 100 * level, lines + linesCleared);
+        setScore(prevScore => {
+          setLines(prevLines => {
+            onGameOver(prevScore + (linesCleared || 0) * 100 * level, prevLines + (linesCleared || 0));
+            return prevLines;
+          });
+          return prevScore;
+        });
       } else {
         setCurrentPiece(nextPiece);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPiece, board, gameOver, isPaused]);
+  }
 
   function movePiece(direction: 'left' | 'right' | 'down') {
     if (!currentPiece || gameOver || isPaused) return;
@@ -343,7 +360,8 @@ export default function Tetris({ onGameOver, userName }: TetrisProps) {
     const frameId = requestAnimationFrame(gameLoop);
     
     return () => cancelAnimationFrame(frameId);
-  }, [gameOver, isPaused, dropPiece]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameOver, isPaused]);
 
   useEffect(() => {
     if (!currentPiece) {
