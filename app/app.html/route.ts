@@ -14,25 +14,81 @@ export async function GET() {
   <meta property="og:title" content="Tetris Game - Farcaster Mini App" />
   <meta property="og:description" content="🎮 经典俄罗斯方块游戏，支持排行榜！快来挑战最高分！" />
   <meta property="og:image" content="https://tetris-app-iota.vercel.app/icon.svg" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
   
   <!-- Twitter -->
-  <meta property="twitter:card" content="summary" />
-  <meta property="twitter:url" content="https://tetris-app-iota.vercel.app/app.html" />
-  <meta property="twitter:title" content="Tetris Game - Farcaster Mini App" />
-  <meta property="twitter:description" content="🎮 经典俄罗斯方块游戏，支持排行榜！" />
-  <meta property="twitter:image" content="https://tetris-app-iota.vercel.app/icon.svg" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:url" content="https://tetris-app-iota.vercel.app/app.html" />
+  <meta name="twitter:title" content="Tetris Game - Farcaster Mini App" />
+  <meta name="twitter:description" content="🎮 经典俄罗斯方块游戏，支持排行榜！" />
+  <meta name="twitter:image" content="https://tetris-app-iota.vercel.app/icon.svg" />
   
   <!-- Allow embedding -->
   <meta http-equiv="X-Frame-Options" content="ALLOWALL" />
   
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #00f0f0, #f0f000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .description {
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: #ccc;
+    }
+    .loading {
+      font-size: 16px;
+      color: #00f0f0;
+      margin-top: 20px;
+    }
+  </style>
+  
   <script>
-    // 立即重定向到主应用
-    window.location.replace('/');
+    // 使用 iframe 加载主应用，确保 Farcaster 可以检测到嵌入内容
+    window.addEventListener('DOMContentLoaded', function() {
+      const iframe = document.createElement('iframe');
+      iframe.src = '/';
+      iframe.style.width = '100%';
+      iframe.style.height = '100vh';
+      iframe.style.border = 'none';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '0';
+      iframe.style.left = '0';
+      document.body.innerHTML = '';
+      document.body.appendChild(iframe);
+    });
   </script>
 </head>
 <body>
-  <div style="font-family: system-ui; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <div>加载中...</div>
+  <div class="container">
+    <h1>🎮 Tetris Game</h1>
+    <p class="description">经典俄罗斯方块游戏，支持排行榜！</p>
+    <div class="loading">正在加载游戏...</div>
   </div>
 </body>
 </html>`;
@@ -41,6 +97,7 @@ export async function GET() {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'X-Frame-Options': 'ALLOWALL',
+      'Cache-Control': 'public, max-age=0, must-revalidate',
     },
   });
 }
