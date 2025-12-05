@@ -33,18 +33,35 @@ export default function Home() {
               if (window.farcaster) {
                 // @ts-ignore
                 const context = await window.farcaster.context;
+                
+                // 调用 ready() 隐藏启动画面
+                try {
+                  // @ts-ignore
+                  if (context?.actions?.ready) {
+                    // @ts-ignore
+                    await context.actions.ready();
+                  }
+                } catch (readyError) {
+                  console.warn('Failed to call ready():', readyError);
+                }
+                
                 if (context?.user) {
                   setUserName(context.user.username || context.user.displayName || '玩家');
                   setFid(context.user.fid);
+                } else {
+                  setUserName('玩家');
                 }
+              } else {
+                setUserName('玩家');
               }
             } catch (e) {
-              console.warn('Farcaster SDK not available');
+              console.warn('Farcaster SDK not available:', e);
+              setUserName('玩家');
             }
-            setUserName('玩家');
             setSdkReady(true);
           };
           script.onerror = () => {
+            // SDK 加载失败，直接设置就绪状态
             setUserName('玩家');
             setSdkReady(true);
           };
