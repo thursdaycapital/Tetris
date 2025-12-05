@@ -1,9 +1,2 @@
-{
-  "rewrites": [
-    {
-      "source": "/app.html",
-      "destination": "/app.html"
-    }
-  ]
-}
+{}
 
