@@ -4,6 +4,14 @@
       "source": "/app.html",
       "destination": "/"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/.well-known/farcaster.json",
+      "destination": "https://api.farcaster.xyz/miniapps/hosted-manifest/019aed6f-49da-c5f3-1913-49746a3ba94a",
+      "permanent": false,
+      "statusCode": 307
+    }
   ]
 }
 
