@@ -3,5 +3,17 @@
     "header": "eyJmaWQiOjMwNjE5MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweGRDMDMzNEFmRjJDYzBEZTkwMjRkM2IzQzAwNzE5Mzc5ZDkwQkFFODUifQ",
     "payload": "eyJkb21haW4iOiJ0ZXRyaXMtYXBwLWlvdGEudmVyY2VsLmFwcCJ9",
     "signature": "fXiuZWq8EfZJKuM//CPcCHCSooQHEN6RRlgwwjfbdVY9g0HH5/uTPpZc/4VFDkfYOd5vRBHBgMCBa5kRZYmtFxs="
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "俄罗斯方块",
+    "iconUrl": "https://tetris-app-iota.vercel.app/icon.svg",
+    "homeUrl": "https://tetris-app-iota.vercel.app/app.html",
+    "imageUrl": "https://tetris-app-iota.vercel.app/icon.svg",
+    "buttonTitle": "俄罗斯方块",
+    "splashImageUrl": "https://tetris-app-iota.vercel.app/splash.svg",
+    "splashBackgroundColor": "#000428",
+    "webhookUrl": "https://tetris-app-iota.vercel.app/api/frame"
   }
 }
+
